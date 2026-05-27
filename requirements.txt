@@ -1,5 +1,5 @@
 Flask
 Flask-Login
-Flask-SocketIo
+Flask-SocketIO
+eventlet
 Werkzeug
-gunicorn
