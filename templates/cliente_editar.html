@@ -1,0 +1,47 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Editar cliente | Maison Lumiere{% endblock %}
+
+{% block hero %}
+<div class="hero-card">
+  <p class="hero-kicker mb-2">Clientes</p>
+  <h1 class="hero-title mb-2">Editar cliente</h1>
+  <p class="hero-subtitle mb-0">Atualize os dados de contato e localização do cliente selecionado.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-6">
+    <article class="surface-card">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 mb-0">{{ cliente['nome'] }}</h2>
+        <span class="badge maison-badge-soft">ID #{{ cliente['id'] }}</span>
+      </div>
+
+      <form action="/clientes/editar/{{ cliente['id'] }}" method="POST" class="row g-3" novalidate>
+        <div class="col-12">
+          <label class="form-label">Nome</label>
+          <input class="form-control" name="nome" value="{{ cliente['nome'] }}" required minlength="2">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email" value="{{ cliente['email'] }}" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Telefone</label>
+          <input class="form-control" name="telefone" value="{{ cliente['telefone'] }}" required minlength="10">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Cidade</label>
+          <input class="form-control" name="cidade" value="{{ cliente['cidade'] }}" required minlength="2">
+        </div>
+        <div class="col-12 d-flex gap-2 flex-wrap">
+          <button type="submit" class="btn btn-maison">Salvar alterações</button>
+          <a href="/clientes" class="btn btn-maison-ghost">Cancelar</a>
+        </div>
+      </form>
+    </article>
+  </div>
+</div>
+{% endblock %}

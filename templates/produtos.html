@@ -1,0 +1,131 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Produtos | Maison Lumiere{% endblock %}
+
+{% block hero %}
+<div class="hero-card">
+  <p class="hero-kicker mb-2">Administração · Velas aromáticas</p>
+  <h1 class="hero-title mb-2">Gestão de Produtos</h1>
+  <p class="hero-subtitle mb-0">CRUD completo do catálogo Maison Lumière com busca, validação e controle de estoque.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <article class="surface-card">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 mb-0">Novo produto</h2>
+        <span class="badge maison-badge maison-badge-soft">Cadastro</span>
+      </div>
+      <form action="/adicionar" method="POST" class="row g-3" novalidate>
+        <div class="col-12">
+          <label class="form-label">Nome</label>
+          <input class="form-control" name="nome" placeholder="Ex.: Vela Lavanda" required minlength="2">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Aroma</label>
+          <input class="form-control" name="aroma" placeholder="Ex.: Lavanda" required minlength="2">
+        </div>
+        <div class="col-6">
+          <label class="form-label">Preço</label>
+          <input class="form-control" name="preco" placeholder="29,90" required pattern="^\d+([.,]\d{1,2})?$">
+        </div>
+        <div class="col-6">
+          <label class="form-label">Estoque</label>
+          <input class="form-control" name="estoque" placeholder="10" required pattern="^\d+$" min="0">
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-maison w-100">Adicionar produto</button>
+        </div>
+      </form>
+    </article>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <article class="surface-card h-100">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <div>
+          <h2 class="h5 mb-1">Produtos cadastrados</h2>
+          <p class="text-muted small mb-0">Gerencie nome, aroma, preço e disponibilidade.</p>
+        </div>
+        <span class="badge maison-badge">{{ produtos|length }} itens</span>
+      </div>
+
+      <form action="/produtos" method="GET" class="search-box mb-3">
+        <div class="input-group">
+          <input
+            type="search"
+            name="q"
+            class="form-control"
+            placeholder="Buscar por nome ou aroma..."
+            value="{{ termo_busca }}"
+          >
+          <button type="submit" class="btn btn-maison">Buscar</button>
+          {% if termo_busca %}
+          <a href="/produtos" class="btn btn-maison-ghost">Limpar</a>
+          {% endif %}
+        </div>
+      </form>
+
+      {% if produtos %}
+      <div class="table-responsive maison-table-wrap">
+        <table class="table maison-table align-middle mb-0">
+          <thead>
+            <tr>
+              <th class="col-nome">Nome</th>
+              <th>Aroma</th>
+              <th>Preço</th>
+              <th>Estoque</th>
+              <th>Status</th>
+              <th class="text-end col-acoes">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in produtos %}
+            <tr>
+              <td class="col-nome">
+                <p class="mb-0 fw-semibold">{{ p.nome }}</p>
+              </td>
+              <td><span class="badge maison-badge-soft">{{ p.aroma }}</span></td>
+              <td class="preco-cell">{{ p.preco_formatado }}</td>
+              <td>{{ p.estoque }}</td>
+              <td>
+                <span class="badge {{ p.status_classe }}">{{ p.status_rotulo }}</span>
+              </td>
+              <td class="text-end col-acoes">
+                <div class="maison-actions justify-content-end">
+                  <a class="btn btn-sm btn-maison-ghost" href="/editar/{{ p.id }}">Editar</a>
+                  <a
+                    class="btn btn-sm btn-outline-danger maison-btn-outline"
+                    href="/deletar/{{ p.id }}"
+                    onclick="return confirmarExclusao({{ p.nome|tojson }});"
+                  >Excluir</a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        {% if termo_busca %}
+        <p class="empty-state-title mb-1">Nenhum resultado encontrado</p>
+        <p class="text-muted mb-0">Não encontramos produtos para "<strong>{{ termo_busca }}</strong>".</p>
+        {% else %}
+        <p class="empty-state-title mb-1">Nenhum produto cadastrado</p>
+        <p class="text-muted mb-0">Comece adicionando sua primeira vela aromática no formulário ao lado.</p>
+        {% endif %}
+      </div>
+      {% endif %}
+    </article>
+  </div>
+</div>
+
+<script>
+  function confirmarExclusao(nome) {
+    return confirm('Tem certeza que deseja excluir o produto "' + nome + '"? Esta ação não pode ser desfeita.');
+  }
+</script>
+{% endblock %}

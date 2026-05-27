@@ -1,0 +1,47 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Editar produto | Maison Lumiere{% endblock %}
+
+{% block hero %}
+<div class="hero-card">
+  <p class="hero-kicker mb-2">Catálogo</p>
+  <h1 class="hero-title mb-2">Editar produto</h1>
+  <p class="hero-subtitle mb-0">Atualize as informações da vela aromática selecionada.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-6">
+    <article class="surface-card">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 mb-0">{{ produto['nome'] }}</h2>
+        <span class="badge maison-badge-soft">ID #{{ produto['id'] }}</span>
+      </div>
+
+      <form action="/editar/{{ produto['id'] }}" method="POST" class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Nome</label>
+          <input class="form-control" name="nome" value="{{ produto['nome'] }}" required minlength="2">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Aroma</label>
+          <input class="form-control" name="aroma" value="{{ produto['aroma'] }}" required minlength="2">
+        </div>
+        <div class="col-6">
+          <label class="form-label">Preço</label>
+          <input class="form-control" name="preco" value="{{ produto['preco'] }}" required>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Estoque</label>
+          <input class="form-control" name="estoque" value="{{ produto['estoque'] }}" required>
+        </div>
+        <div class="col-12 d-flex gap-2 flex-wrap">
+          <button type="submit" class="btn btn-maison">Salvar alterações</button>
+          <a href="/produtos" class="btn btn-maison-ghost">Cancelar</a>
+        </div>
+      </form>
+    </article>
+  </div>
+</div>
+{% endblock %}

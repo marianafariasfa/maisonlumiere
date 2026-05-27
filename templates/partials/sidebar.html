@@ -1,0 +1,22 @@
+<div class="admin-sidebar h-100">
+  <div class="p-4 border-bottom border-light-subtle sidebar-head">
+    <p class="text-uppercase small sidebar-label mb-2">Administrativo</p>
+    <h2 class="h5 mb-0">Painel Operacional</h2>
+  </div>
+
+  <nav class="p-3">
+    <a class="sidebar-link{% if request.path.startswith('/dashboard') %} active{% endif %}" href="/dashboard">
+      <span class="sidebar-dot"></span>Dashboard
+    </a>
+    <a class="sidebar-link{% if request.path.startswith('/produtos') or request.path.startswith('/editar') or request.path.startswith('/adicionar') or (request.path.startswith('/deletar') and not request.path.startswith('/clientes')) %} active{% endif %}" href="/produtos">
+      <span class="sidebar-dot"></span>Produtos
+    </a>
+    <a class="sidebar-link{% if request.path.startswith('/vendas') %} active{% endif %}" href="/vendas">
+      <span class="sidebar-dot"></span>Vendas
+    </a>
+    <a class="sidebar-link{% if request.path.startswith('/clientes') %} active{% endif %}" href="/clientes">
+      <span class="sidebar-dot"></span>Clientes
+    </a>
+    <a class="sidebar-link" href="/">Voltar ao site</a>
+  </nav>
+</div>

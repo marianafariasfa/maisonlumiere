@@ -1,0 +1,39 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Cadastro | Maison Lumiere{% endblock %}
+
+{% block hero %}
+<div class="hero-card">
+  <p class="hero-kicker mb-2">Conta</p>
+  <h1 class="hero-title mb-2">Criar novo acesso</h1>
+  <p class="hero-subtitle mb-0">Cadastro simples de usuário com senha criptografada para autenticação segura.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+    <article class="surface-card">
+      <h2 class="h5 mb-3">Cadastro</h2>
+      <form method="POST" action="/cadastro" class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Nome</label>
+          <input type="text" name="nome" class="form-control" placeholder="Seu nome" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" placeholder="seuemail@exemplo.com" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Senha</label>
+          <input type="password" name="senha" class="form-control" placeholder="Crie uma senha" required>
+        </div>
+        <div class="col-12 d-grid">
+          <button type="submit" class="btn btn-maison">Cadastrar</button>
+        </div>
+      </form>
+      <p class="text-muted mt-3 mb-0">Já possui conta? <a href="/login">Fazer login</a></p>
+    </article>
+  </div>
+</div>
+{% endblock %}

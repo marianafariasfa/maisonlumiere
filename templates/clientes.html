@@ -1,0 +1,144 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Clientes | Maison Lumiere{% endblock %}
+
+{% block hero %}
+<div class="hero-card">
+  <p class="hero-kicker mb-2">Administração · Maison Lumière</p>
+  <h1 class="hero-title mb-2">Gestão de Clientes</h1>
+  <p class="hero-subtitle mb-0">Cadastro, edição e busca da base de clientes da loja de velas aromáticas.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <article class="surface-card">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 mb-0">Novo cliente</h2>
+        <span class="badge maison-badge maison-badge-soft">Cadastro</span>
+      </div>
+      <form action="/clientes/adicionar" method="POST" class="row g-3" novalidate>
+        <div class="col-12">
+          <label class="form-label">Nome</label>
+          <input class="form-control" name="nome" placeholder="Ex.: Maria Silva" required minlength="2">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email" placeholder="cliente@email.com" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Telefone</label>
+          <input class="form-control" name="telefone" placeholder="(11) 99999-9999" required minlength="10">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Cidade</label>
+          <input class="form-control" name="cidade" placeholder="Ex.: São Paulo" required minlength="2">
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-maison w-100">Cadastrar cliente</button>
+        </div>
+      </form>
+    </article>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <article class="surface-card h-100">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <div>
+          <h2 class="h5 mb-1">Clientes cadastrados</h2>
+          <p class="text-muted small mb-0">Busca em tempo real por nome, email, telefone ou cidade.</p>
+        </div>
+        <span class="badge maison-badge">{{ clientes|length }} clientes</span>
+      </div>
+
+      <form id="formBuscaClientes" action="/clientes" method="GET" class="search-box mb-3">
+        <div class="input-group">
+          <input
+            type="search"
+            id="buscaClientes"
+            name="q"
+            class="form-control"
+            placeholder="Buscar cliente..."
+            value="{{ termo_busca }}"
+            autocomplete="off"
+          >
+          <button type="submit" class="btn btn-maison">Buscar</button>
+          {% if termo_busca %}
+          <a href="/clientes" class="btn btn-maison-ghost">Limpar</a>
+          {% endif %}
+        </div>
+      </form>
+
+      {% if clientes %}
+      <div class="table-responsive maison-table-wrap">
+        <table class="table maison-table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Telefone</th>
+              <th>Cidade</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in clientes %}
+            <tr>
+              <td>
+                <p class="mb-0 fw-semibold">{{ c.nome }}</p>
+                <span class="badge maison-badge-soft mt-1">Cliente</span>
+              </td>
+              <td>{{ c.email }}</td>
+              <td>{{ c.telefone }}</td>
+              <td><span class="badge badge-cidade">{{ c.cidade }}</span></td>
+              <td class="text-end">
+                <div class="maison-actions justify-content-end">
+                  <a class="btn btn-sm btn-maison-ghost" href="/clientes/editar/{{ c.id }}">Editar</a>
+                  <a
+                    class="btn btn-sm btn-outline-danger maison-btn-outline"
+                    href="/clientes/deletar/{{ c.id }}"
+                    onclick="return confirmarExclusaoCliente({{ c.nome|tojson }});"
+                  >Excluir</a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        {% if termo_busca %}
+        <p class="empty-state-title mb-1">Nenhum resultado encontrado</p>
+        <p class="text-muted mb-0">Não encontramos clientes para "<strong>{{ termo_busca }}</strong>".</p>
+        {% else %}
+        <p class="empty-state-title mb-1">Nenhum cliente cadastrado</p>
+        <p class="text-muted mb-0">Cadastre o primeiro cliente no formulário ao lado.</p>
+        {% endif %}
+      </div>
+      {% endif %}
+    </article>
+  </div>
+</div>
+
+<script>
+  function confirmarExclusaoCliente(nome) {
+    return confirm('Tem certeza que deseja excluir o cliente "' + nome + '"? Esta ação não pode ser desfeita.');
+  }
+
+  (function () {
+    var input = document.getElementById('buscaClientes');
+    var form = document.getElementById('formBuscaClientes');
+    if (!input || !form) return;
+
+    var timer = null;
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        form.submit();
+      }, 400);
+    });
+  })();
+</script>
+{% endblock %}

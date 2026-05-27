@@ -1,0 +1,123 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Início | Maison Lumière{% endblock %}
+
+{% block hero %}
+<div class="hero-card hero-home">
+  <p class="hero-kicker mb-2">Maison Lumière · Administração</p>
+  <h1 class="hero-title mb-2">Bem-vindo(a), {{ current_user.nome }}</h1>
+  <p class="hero-subtitle mb-4">Visão rápida da operação: catálogo, clientes, vendas e alertas de estoque.</p>
+  <div class="d-flex gap-2 flex-wrap">
+    <a class="btn btn-maison" href="/dashboard">Abrir dashboard</a>
+    <a class="btn btn-maison-ghost" href="/vendas">Registrar venda</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 g-xl-4 mb-4">
+  <div class="col-6 col-lg-3">
+    <article class="metric-card">
+      <p class="metric-label">Produtos</p>
+      <h3 class="metric-value">{{ total_produtos }}</h3>
+      <span class="metric-foot">Catálogo ativo</span>
+    </article>
+  </div>
+  <div class="col-6 col-lg-3">
+    <article class="metric-card">
+      <p class="metric-label">Clientes</p>
+      <h3 class="metric-value">{{ total_clientes }}</h3>
+      <span class="metric-foot">Base cadastrada</span>
+    </article>
+  </div>
+  <div class="col-6 col-lg-3">
+    <article class="metric-card">
+      <p class="metric-label">Vendas</p>
+      <h3 class="metric-value">{{ total_vendas }}</h3>
+      <span class="metric-foot">Transações</span>
+    </article>
+  </div>
+  <div class="col-6 col-lg-3">
+    <article class="metric-card metric-card-accent">
+      <p class="metric-label">Faturamento</p>
+      <h3 class="metric-value metric-value-sm">{{ faturamento_formatado }}</h3>
+      <span class="metric-foot">Acumulado</span>
+    </article>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-7">
+    <article class="surface-card h-100">
+      <p class="card-kicker mb-2">Atalhos</p>
+      <h2 class="h5 mb-3">Ações rápidas</h2>
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <a class="quick-link" href="/produtos">
+            <div>
+              <p class="mb-1 fw-semibold">Gerenciar produtos</p>
+              <small class="text-muted">CRUD do catálogo e alertas de estoque</small>
+            </div>
+            <span class="badge maison-badge-soft">{{ alertas_estoque|length }} alertas</span>
+          </a>
+        </div>
+        <div class="col-12 col-md-6">
+          <a class="quick-link" href="/clientes">
+            <div>
+              <p class="mb-1 fw-semibold">Gerenciar clientes</p>
+              <small class="text-muted">Cadastro e busca em tempo real</small>
+            </div>
+            <span class="badge maison-badge">{{ total_clientes }}</span>
+          </a>
+        </div>
+        <div class="col-12 col-md-6">
+          <a class="quick-link" href="/vendas">
+            <div>
+              <p class="mb-1 fw-semibold">Registrar venda</p>
+              <small class="text-muted">Baixa automática de estoque</small>
+            </div>
+            <span class="badge badge-venda-ok">Pronto</span>
+          </a>
+        </div>
+        <div class="col-12 col-md-6">
+          <a class="quick-link" href="/dashboard">
+            <div>
+              <p class="mb-1 fw-semibold">Dashboard</p>
+              <small class="text-muted">Métricas e gráficos premium</small>
+            </div>
+            <span class="badge maison-badge-soft">Insights</span>
+          </a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <article class="surface-card h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Alertas de estoque</h2>
+        <span class="badge maison-badge">{{ alertas_estoque|length }}</span>
+      </div>
+      {% if alertas_estoque %}
+      <ul class="alertas-lista list-unstyled mb-0">
+        {% for item in alertas_estoque[:5] %}
+        <li class="alerta-item">
+          <div>
+            <p class="mb-0 fw-semibold">{{ item.nome }}</p>
+            <small class="text-muted">{{ item.aroma }} · {{ item.estoque }} un.</small>
+          </div>
+          <span class="badge {{ item.status_classe }}">{{ item.status_rotulo }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="/produtos" class="btn btn-maison-ghost btn-sm mt-3">Ver catálogo</a>
+      {% else %}
+      <div class="empty-state mb-0">
+        <p class="empty-state-title mb-1">Estoque saudável</p>
+        <p class="text-muted mb-0">Nenhum produto com estoque baixo ou zerado.</p>
+      </div>
+      {% endif %}
+    </article>
+  </div>
+</div>
+{% endblock %}

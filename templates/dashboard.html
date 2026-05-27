@@ -1,0 +1,278 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Dashboard | Maison Lumiere{% endblock %}
+
+{% block hero %}
+<div class="hero-card">
+  <p class="hero-kicker mb-2">Maison Lumière · Administração</p>
+  <h1 class="hero-title mb-2">Dashboard Operacional</h1>
+  <p class="hero-subtitle mb-0">Visão geral da loja de velas aromáticas com métricas reais atualizadas do SQLite.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 g-xl-4 mb-4">
+  <div class="col-6 col-lg-4 col-xl-2">
+    <article class="metric-card">
+      <p class="metric-label">Produtos</p>
+      <h3 class="metric-value">{{ total_produtos }}</h3>
+      <span class="metric-foot">Catálogo ativo</span>
+    </article>
+  </div>
+  <div class="col-6 col-lg-4 col-xl-2">
+    <article class="metric-card">
+      <p class="metric-label">Clientes</p>
+      <h3 class="metric-value">{{ total_clientes }}</h3>
+      <span class="metric-foot">Base cadastrada</span>
+    </article>
+  </div>
+  <div class="col-6 col-lg-4 col-xl-2">
+    <article class="metric-card">
+      <p class="metric-label">Vendas</p>
+      <h3 class="metric-value">{{ total_vendas }}</h3>
+      <span class="metric-foot">Transações totais</span>
+    </article>
+  </div>
+  <div class="col-6 col-lg-4 col-xl-2">
+    <article class="metric-card metric-card-accent">
+      <p class="metric-label">Faturamento</p>
+      <h3 class="metric-value metric-value-sm">{{ faturamento_formatado }}</h3>
+      <span class="metric-foot">Receita acumulada</span>
+    </article>
+  </div>
+  <div class="col-6 col-lg-6 col-xl-2">
+    <article class="metric-card">
+      <p class="metric-label">Estoque baixo</p>
+      <h3 class="metric-value">{{ alertas_estoque|length }}</h3>
+      <span class="metric-foot">Alertas ativos</span>
+    </article>
+  </div>
+  <div class="col-6 col-lg-6 col-xl-2">
+    <article class="metric-card">
+      <p class="metric-label">Mais vendido</p>
+      {% if produto_mais_vendido %}
+      <h3 class="metric-value metric-value-sm">{{ produto_mais_vendido.nome }}</h3>
+      <span class="metric-foot">{{ produto_mais_vendido.quantidade }} un.</span>
+      {% else %}
+      <h3 class="metric-value">—</h3>
+      <span class="metric-foot">Sem vendas ainda</span>
+      {% endif %}
+    </article>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-12 col-lg-4">
+    <article class="surface-card h-100">
+      <p class="card-kicker mb-2">Resumo de vendas</p>
+      <h2 class="h5 mb-3">Performance</h2>
+      <div class="resumo-item">
+        <span class="text-muted">Vendas hoje</span>
+        <strong>{{ resumo_vendas.hoje_quantidade }}</strong>
+      </div>
+      <div class="resumo-item">
+        <span class="text-muted">Faturamento hoje</span>
+        <strong>{{ resumo_vendas.hoje_total_formatado }}</strong>
+      </div>
+      <div class="resumo-item">
+        <span class="text-muted">Ticket médio</span>
+        <strong>{{ resumo_vendas.ticket_medio_formatado }}</strong>
+      </div>
+      <div class="resumo-item mb-0">
+        <span class="text-muted">Faturamento total</span>
+        <strong class="preco-cell">{{ faturamento_formatado }}</strong>
+      </div>
+      <a href="/vendas" class="btn btn-maison btn-sm mt-3">Registrar venda</a>
+    </article>
+  </div>
+
+  <div class="col-12 col-lg-8">
+    <article class="surface-card h-100">
+      <p class="card-kicker mb-2">Faturamento</p>
+      <h2 class="h5 mb-3">Vendas por dia</h2>
+      {% if vendas_por_dia.labels %}
+      <div class="dashboard-chart-wrap">
+        <canvas id="chartVendasDia" height="120"></canvas>
+      </div>
+      {% else %}
+      <div class="empty-state mb-0">
+        <p class="empty-state-title mb-1">Sem dados de faturamento</p>
+        <p class="text-muted mb-0">Registre vendas para visualizar o gráfico.</p>
+      </div>
+      {% endif %}
+    </article>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-12 col-lg-7">
+    <article class="surface-card h-100">
+      <p class="card-kicker mb-2">Ranking</p>
+      <h2 class="h5 mb-3">Produtos mais vendidos</h2>
+      {% if top_produtos.labels %}
+      <div class="dashboard-chart-wrap">
+        <canvas id="chartTopProdutos" height="140"></canvas>
+      </div>
+      {% else %}
+      <div class="empty-state mb-0">
+        <p class="empty-state-title mb-1">Sem ranking disponível</p>
+        <p class="text-muted mb-0">O gráfico aparece após as primeiras vendas.</p>
+      </div>
+      {% endif %}
+    </article>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <article class="surface-card h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Alertas de estoque</h2>
+        <span class="badge maison-badge">{{ alertas_estoque|length }}</span>
+      </div>
+      {% if alertas_estoque %}
+      <ul class="alertas-lista list-unstyled mb-0">
+        {% for item in alertas_estoque %}
+        <li class="alerta-item">
+          <div>
+            <p class="mb-0 fw-semibold">{{ item.nome }}</p>
+            <small class="text-muted">{{ item.aroma }} · {{ item.estoque }} un.</small>
+          </div>
+          <span class="badge {{ item.status_classe }}">{{ item.status_rotulo }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="/produtos" class="btn btn-maison-ghost btn-sm mt-3">Gerenciar produtos</a>
+      {% else %}
+      <div class="empty-state mb-0">
+        <p class="empty-state-title mb-1">Estoque saudável</p>
+        <p class="text-muted mb-0">Nenhum produto com estoque baixo ou zerado.</p>
+      </div>
+      {% endif %}
+    </article>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12">
+    <article class="surface-card">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <div>
+          <p class="card-kicker mb-2">Atividades recentes</p>
+          <h2 class="h5 mb-0">Últimas vendas</h2>
+        </div>
+        <a href="/vendas" class="btn btn-maison-ghost btn-sm">Ver todas</a>
+      </div>
+
+      {% if vendas_recentes %}
+      <div class="table-responsive maison-table-wrap">
+        <table class="table maison-table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Cliente</th>
+              <th>Produto</th>
+              <th>Qtd</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in vendas_recentes %}
+            <tr>
+              <td>{{ v.data_formatada }}</td>
+              <td class="fw-semibold">{{ v.cliente_nome }}</td>
+              <td>{{ v.produto_nome }}</td>
+              <td>{{ v.quantidade }}</td>
+              <td class="preco-cell">{{ v.valor_total_formatado }}</td>
+              <td><span class="badge badge-venda-ok">Concluída</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <p class="empty-state-title mb-1">Nenhuma atividade recente</p>
+        <p class="text-muted mb-0">As vendas registradas aparecerão aqui automaticamente.</p>
+      </div>
+      {% endif %}
+    </article>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    var cores = {
+      linha: '#83b7bc',
+      linhaFill: 'rgba(131, 183, 188, 0.18)',
+      barra: '#b99763',
+      barraBorda: '#9a7d4f',
+      texto: '#516060',
+      grade: '#e7e0d6'
+    };
+
+    var labelsDia = {{ vendas_por_dia.labels|tojson }};
+    var valoresDia = {{ vendas_por_dia.valores|tojson }};
+    if (labelsDia.length && document.getElementById('chartVendasDia')) {
+      new Chart(document.getElementById('chartVendasDia'), {
+        type: 'line',
+        data: {
+          labels: labelsDia,
+          datasets: [{
+            label: 'Faturamento (R$)',
+            data: valoresDia,
+            borderColor: cores.linha,
+            backgroundColor: cores.linhaFill,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 4,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: cores.linha,
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: cores.texto }, grid: { color: cores.grade } },
+            y: { ticks: { color: cores.texto }, grid: { color: cores.grade } }
+          }
+        }
+      });
+    }
+
+    var labelsTop = {{ top_produtos.labels|tojson }};
+    var qtdTop = {{ top_produtos.quantidades|tojson }};
+    if (labelsTop.length && document.getElementById('chartTopProdutos')) {
+      new Chart(document.getElementById('chartTopProdutos'), {
+        type: 'bar',
+        data: {
+          labels: labelsTop,
+          datasets: [{
+            label: 'Unidades vendidas',
+            data: qtdTop,
+            backgroundColor: cores.barra,
+            borderColor: cores.barraBorda,
+            borderWidth: 1,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: cores.texto, stepSize: 1 }, grid: { color: cores.grade } },
+            y: { ticks: { color: cores.texto }, grid: { display: false } }
+          }
+        }
+      });
+    }
+  })();
+</script>
+{% endblock %}

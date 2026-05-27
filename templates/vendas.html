@@ -1,0 +1,211 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Vendas | Maison Lumiere{% endblock %}
+
+{% block hero %}
+<div class="hero-card">
+  <p class="hero-kicker mb-2">Administração · Velas aromáticas</p>
+  <h1 class="hero-title mb-2">Gestão de Vendas</h1>
+  <p class="hero-subtitle mb-0">Registre vendas integradas a clientes e produtos, com controle automático de estoque.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <article class="surface-card">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 mb-0">Nova venda</h2>
+        <span class="badge maison-badge maison-badge-soft">Registrar</span>
+      </div>
+
+      {% if not clientes or not produtos %}
+      <div class="empty-state mb-0">
+        {% if not clientes and not produtos %}
+        <p class="empty-state-title mb-1">Cadastros necessários</p>
+        <p class="text-muted mb-0">Cadastre clientes e produtos antes de registrar vendas.</p>
+        {% elif not clientes %}
+        <p class="empty-state-title mb-1">Nenhum cliente cadastrado</p>
+        <p class="text-muted mb-0"><a href="/clientes">Cadastre clientes</a> para continuar.</p>
+        {% else %}
+        <p class="empty-state-title mb-1">Nenhum produto cadastrado</p>
+        <p class="text-muted mb-0"><a href="/produtos">Cadastre produtos</a> para continuar.</p>
+        {% endif %}
+      </div>
+      {% else %}
+      <form id="formVenda" action="/vendas/registrar" method="POST" class="row g-3" novalidate>
+        <div class="col-12">
+          <label class="form-label">Cliente</label>
+          <select class="form-select maison-select" name="cliente_id" required>
+            <option value="">Selecione um cliente</option>
+            {% for c in clientes %}
+            <option value="{{ c.id }}">{{ c.nome }} · {{ c.email }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Produto</label>
+          <select id="selectProduto" class="form-select maison-select" name="produto_id" required>
+            <option value="">Selecione um produto</option>
+            {% for p in produtos %}
+            <option
+              value="{{ p.id }}"
+              data-preco="{{ p.preco }}"
+              data-estoque="{{ p.estoque }}"
+              data-nome="{{ p.nome }}"
+              {% if p.estoque <= 0 %}disabled{% endif %}
+            >
+              {{ p.nome }} · {{ p.preco_formatado }} · estoque {{ p.estoque }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Quantidade</label>
+          <input id="inputQuantidade" class="form-control" type="number" name="quantidade" min="1" value="1" required>
+        </div>
+
+        <div class="col-12">
+          <div class="venda-resumo">
+            <p class="card-kicker mb-2">Resumo da venda</p>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Produto</span>
+              <strong id="resumoProduto">—</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Preço unitário</span>
+              <strong id="resumoPreco">—</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Estoque disponível</span>
+              <strong id="resumoEstoque">—</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Quantidade</span>
+              <strong id="resumoQuantidade">1</strong>
+            </div>
+            <hr class="my-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">Total</span>
+              <span class="badge maison-badge" id="resumoTotal">R$ 0,00</span>
+            </div>
+            <p class="small text-muted mt-2 mb-0" id="resumoStatus">Selecione cliente e produto para continuar.</p>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-maison w-100">Registrar venda</button>
+        </div>
+      </form>
+      {% endif %}
+    </article>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <article class="surface-card h-100">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <div>
+          <h2 class="h5 mb-1">Histórico de vendas</h2>
+          <p class="text-muted small mb-0">Todas as vendas registradas com cliente, produto e valor total.</p>
+        </div>
+        <span class="badge maison-badge">{{ historico|length }} vendas</span>
+      </div>
+
+      {% if historico %}
+      <div class="table-responsive maison-table-wrap">
+        <table class="table maison-table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Cliente</th>
+              <th>Produto</th>
+              <th>Qtd</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in historico %}
+            <tr>
+              <td>{{ v.data_formatada }}</td>
+              <td>
+                <p class="mb-0 fw-semibold">{{ v.cliente_nome }}</p>
+              </td>
+              <td>
+                <p class="mb-0">{{ v.produto_nome }}</p>
+                <small class="text-muted">{{ v.produto_aroma }}</small>
+              </td>
+              <td>{{ v.quantidade }}</td>
+              <td class="preco-cell">{{ v.valor_total_formatado }}</td>
+              <td><span class="badge badge-venda-ok">Concluída</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <p class="empty-state-title mb-1">Nenhuma venda registrada</p>
+        <p class="text-muted mb-0">Registre a primeira venda no formulário ao lado.</p>
+      </div>
+      {% endif %}
+    </article>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var selectProduto = document.getElementById('selectProduto');
+    var inputQuantidade = document.getElementById('inputQuantidade');
+    if (!selectProduto || !inputQuantidade) return;
+
+    var resumoProduto = document.getElementById('resumoProduto');
+    var resumoPreco = document.getElementById('resumoPreco');
+    var resumoEstoque = document.getElementById('resumoEstoque');
+    var resumoQuantidade = document.getElementById('resumoQuantidade');
+    var resumoTotal = document.getElementById('resumoTotal');
+    var resumoStatus = document.getElementById('resumoStatus');
+
+    function formatarMoeda(valor) {
+      return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
+    }
+
+    function atualizarResumo() {
+      var option = selectProduto.options[selectProduto.selectedIndex];
+      var quantidade = parseInt(inputQuantidade.value, 10) || 0;
+
+      if (!option || !option.value) {
+        resumoProduto.textContent = '—';
+        resumoPreco.textContent = '—';
+        resumoEstoque.textContent = '—';
+        resumoQuantidade.textContent = quantidade > 0 ? quantidade : '—';
+        resumoTotal.textContent = 'R$ 0,00';
+        resumoStatus.textContent = 'Selecione cliente e produto para continuar.';
+        return;
+      }
+
+      var preco = parseFloat(option.dataset.preco);
+      var estoque = parseInt(option.dataset.estoque, 10);
+      var nome = option.dataset.nome;
+
+      resumoProduto.textContent = nome;
+      resumoPreco.textContent = formatarMoeda(preco);
+      resumoEstoque.textContent = estoque + ' un.';
+      resumoQuantidade.textContent = quantidade;
+      resumoTotal.textContent = formatarMoeda(preco * quantidade);
+
+      if (quantidade <= 0) {
+        resumoStatus.textContent = 'Informe uma quantidade valida.';
+      } else if (quantidade > estoque) {
+        resumoStatus.textContent = 'Estoque insuficiente para esta quantidade.';
+      } else {
+        resumoStatus.textContent = 'Pronto para registrar a venda.';
+      }
+    }
+
+    selectProduto.addEventListener('change', atualizarResumo);
+    inputQuantidade.addEventListener('input', atualizarResumo);
+    atualizarResumo();
+  })();
+</script>
+{% endblock %}
