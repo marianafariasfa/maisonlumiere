@@ -1,5 +1,4 @@
 from flask import Flask, flash, redirect, render_template, request, url_for
-from flask_socketio import SocketIO
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -13,17 +12,12 @@ import sqlite3
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 
-ESTOQUE_BAIXO_LIMITE = 5
-
 app = Flask(__name__)
 app.secret_key = "maison-lumiere-secret-key"
 
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 login_manager = LoginManager()
 login_manager.login_view = "login"
-login_manager.login_message = "Faça login para acessar esta área."
-login_manager.login_message_category = "warning"
 login_manager.init_app(app)
 
 
@@ -45,11 +39,11 @@ def carregar_usuario(user_id):
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute("SELECT id, nome, email FROM usuario WHERE id = ?", (user_id,))
-    registro = cursor.fetchone()
+    user = cursor.fetchone()
     conn.close()
 
-    if registro:
-        return Usuario(registro["id"], registro["nome"], registro["email"])
+    if user:
+        return Usuario(user["id"], user["nome"], user["email"])
     return None
 
 
@@ -67,11 +61,8 @@ def dashboard():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for("home"))
-
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
+        email = request.form.get("email", "").lower()
         senha = request.form.get("senha", "")
 
         conn = conectar()
@@ -98,12 +89,14 @@ def cadastro():
 
         conn = conectar()
         cursor = conn.cursor()
+
         cursor.execute("SELECT id FROM usuario WHERE email = ?", (email,))
         if cursor.fetchone():
             flash("Email já cadastrado.", "warning")
             return render_template("cadastro.html")
 
         senha_hash = generate_password_hash(senha)
+
         cursor.execute(
             "INSERT INTO usuario (nome, email, senha_hash) VALUES (?, ?, ?)",
             (nome, email, senha_hash),
@@ -124,15 +117,5 @@ def logout():
     return redirect("/login")
 
 
-@socketio.on("message")
-def handle_message(msg):
-    print("Mensagem:", msg)
-
-
-@app.route("/teste")
-def teste():
-    return "ROTA FUNCIONANDO"
-
-
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=10000)
+    app.run(debug=True)
