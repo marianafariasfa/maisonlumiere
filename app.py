@@ -1,5 +1,4 @@
 from flask import Flask, flash, redirect, render_template, request, url_for 
-from flask_socketio import SocketIO
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -16,7 +15,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 ESTOQUE_BAIXO_LIMITE = 5
 
 app = Flask(__name__)
-socketio = SocketIO(app)
 app.secret_key = "maison-lumiere-secret-key"
 
 login_manager = LoginManager()
